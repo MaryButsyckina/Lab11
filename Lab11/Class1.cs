@@ -2,16 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace Lab1
 {
     abstract class Product
     {
-        private string name;
-        private int id;
-        private string product_type;
+        //fields
+        public string name;
+        public int id;
+        public string product_type;
 
+        //constructors
         public Product(string name, int id, string type)
         {
             SetName(name);
@@ -23,12 +27,14 @@ namespace Lab1
             name = string.Empty;
             id = 0;
             product_type = string.Empty;
-        }
+        } //default constructor
 
+        //getters
         public string GetName() { return name; }
         public int GetId() { return id; }
         public string GetProductType() { return product_type; }
 
+        //setters
         public void SetName(string name)
         {
             this.name = name;
@@ -43,6 +49,7 @@ namespace Lab1
             this.product_type = type;
         }
 
+        //virtual method, prints the product info
         virtual public void Print()
         {
             Console.WriteLine("Name: {0}; Id: {1}; Type: {2}", name, id, product_type);
@@ -51,10 +58,12 @@ namespace Lab1
 
     class Detail : Product
     {
-        public Detail() : base() { }
+        //constructors
+        public Detail() : base() { } //dafault constructor
         public Detail(string name, int id, string type) : base(name, id, type)
         { }
 
+        //override method Print
         public override void Print()
         {
             base.Print();
@@ -63,37 +72,37 @@ namespace Lab1
 
     interface IEquipment
     {
-        void AddEquipment(Detail detail);
-        void AddEquipment(string name, int id, string type);
-        void ClearEquipment();
-        void RemoveEquipment(Detail detail);
+        void AddEquipment(Detail detail); //add detail
+        void AddEquipment(string name, int id, string type); //construct and add detail
+        void ClearEquipment(); //clear equipmnet list
+        void RemoveEquipment(Detail detail); //remove exact detail
     }
 
     class Furniture : Product, IEquipment
     {
-        private List<Detail> equipment;
+        //fields
+        public List<Detail> equipment; 
 
+        //constructors
         public Furniture(string name, int id, string type, List<Detail> equipment) : base(name, id, type)
         {
             this.equipment = equipment;
         }
-
         public Furniture(string name, int id, string type) : base(name, id, type)
         {
             this.equipment = new List<Detail>();
         }
-
         public Furniture(int id) : base()
         {
             this.SetId(id);
             this.equipment = new List<Detail>();
         }
-
         public Furniture() : base()
         {
             equipment = new List<Detail>();
         }
 
+        //override method Print
         public override void Print()
         {
             Console.WriteLine("Name: {0}; Id: {1}; Type: {2}", GetName(), GetId(), GetProductType());
@@ -101,6 +110,7 @@ namespace Lab1
             foreach (Detail item in equipment) { Console.WriteLine(item.GetName()); };
         }
 
+        //setter and getter for equipmnet
         public void SetEquipment(List<Detail> dd) 
         { 
             equipment = new List<Detail>();
@@ -109,8 +119,10 @@ namespace Lab1
                 equipment.Add(item);
             }
         }
-        public void ClearEquipment() { equipment.Clear(); }
         public List<Detail> GetEquipment() { return equipment; }
+
+        //IEquipmnet methods
+        public void ClearEquipment() { equipment.Clear(); }
         public void AddEquipment(Detail detail) { equipment.Add(detail); }
         public void AddEquipment(string name, int id, string type)
         {

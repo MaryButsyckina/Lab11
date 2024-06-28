@@ -34,13 +34,6 @@ namespace Lab1
         public NotUniqueID(string message) : base(message) { }
         public NotUniqueID(string message, Exception innerException) : base(message, innerException) { }
     }
-
-    public class MultuipleEdit : Exception
-    {
-        public MultuipleEdit() : base() { }
-        public MultuipleEdit(string message) : base(message) { }
-        public MultuipleEdit(string message, Exception innerException) : base(message, innerException) { }
-    }
 }
 //this.listView1.FullRowSelect = true;
 //this.listView1.Columns.Add("N", 30);

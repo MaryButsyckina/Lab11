@@ -1,7 +1,7 @@
 using Lab1;
+using System.Security.Cryptography.X509Certificates;
 using System.Windows.Forms;
-using static System.Net.Mime.MediaTypeNames;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System.Text.Json;
 
 namespace Lab11
 {
@@ -10,9 +10,23 @@ namespace Lab11
         private Dictionary<int, Furniture> furniture = new Dictionary<int, Furniture>();
         private int furn_counter = 0;
         private List<Detail> equipment = new List<Detail>();
+
+        Thread thread;
+        CancellationTokenSource ct;
+
+        bool dispose_fl = false;
+
+        private TCPclient client;
+
         public Form1()
         {
             InitializeComponent();
+
+            client = new TCPclient();
+            thread = new Thread(client_worker);
+            ct = new CancellationTokenSource();
+            ct.Cancel();
+            thread.Start();
         }
 
         private void addItemToolStripMenuItem_Click(object sender, EventArgs e)
@@ -378,6 +392,139 @@ namespace Lab11
 
             dlg4.AutoSize = true;
             dlg4.ShowDialog();
+        }
+
+        private void settings(object sender, EventArgs e)
+        {
+            Label l = new Label();
+            l.Text = $"ID: {client.client_id.ToString()}";
+            l.AutoSize = true;
+            set.Controls.Add(l);
+
+            Label l2 = new Label();
+            l2.Text = "IP: ";
+            l2.Size = new Size(50, 30);
+            l2.Location = new Point(0, 30);
+            set.Controls.Add(l2);
+
+            set.Show();
+        }
+
+        private void connect(object sender, EventArgs e)
+        {
+            bool res = client.Connect();
+            if (res) { ((ToolStripMenuItem)sender).BackColor = Color.LightGreen; ct = new CancellationTokenSource(); }
+            else { MessageBox.Show("Connection failed", "Connection failed", MessageBoxButtons.OK, MessageBoxIcon.Error); }
+        }
+        private void disconnect(object sender, EventArgs e)
+        {
+            client.Disconnect();
+            tcpToolStripMenuItem.DropDownItems[0].BackColor = Color.White;
+            ct.Cancel();
+        }
+        private void others(object sender, EventArgs e)
+        {
+            bool res = client.Send("1112");
+        }
+
+        private void senfOthers(object sender, EventArgs e)
+        {
+            client.Send("1113");
+            int x = (Int32)lboth.SelectedItems[0];
+            Thread.Sleep(10);
+            client.Send(x.ToString());
+
+            Random rand = new Random();
+            int i1 = rand.Next(0, furniture.Count());
+            int i2 = rand.Next(0, furniture.Count());
+
+            List<int> keys = new List<int>();
+            foreach (int i in furniture.Keys) { keys.Add(i); }
+
+            var options = new JsonSerializerOptions { IncludeFields = true };
+            string ff1 = JsonSerializer.Serialize(furniture[keys[i1]], options);
+            string ff2 = JsonSerializer.Serialize(furniture[keys[i2]], options);
+
+            client.Send(ff1);
+            Thread.Sleep(10);
+            client.Send(ff2);
+            Thread.Sleep(10);
+            client.Send("0000");
+        }
+
+        private void client_worker()
+        {
+            string msg;
+            while (true)
+            {
+                if (dispose_fl) { break; }
+                if (ct.Token.IsCancellationRequested) { Thread.Sleep(50); continue; }
+                if (!client.tcpClient.Connected) { Thread.Sleep(50); continue; }
+                msg = client.Receive(4);
+
+                if (msg == "1111")
+                {
+                    msg = client.Receive(4);
+                    client.client_id = Int32.Parse(msg);
+                }
+                else if (msg == "1112")
+                {
+                    List<int> others = new List<int>();
+                    msg = client.Receive(4);
+                    while (msg != "0000")
+                    {
+                        others.Add(Int32.Parse(msg));
+                        msg = client.Receive(4);
+                    }
+                    Action act1 = () => showOthers(others);
+                    Invoke(act1);
+                }
+                else if (msg == "1113")
+                {
+                    msg = client.Receive(4);
+                    int sender = Int32.Parse(msg);
+
+                    List<Furniture> lf = new List<Furniture>();
+
+                    msg = client.Receive(1024);
+                    msg = msg.TrimEnd(new char[] { '\0' });
+                    while (msg != "0000" && msg != "")
+                    {
+                        var options = new JsonSerializerOptions { IncludeFields = true };
+                        Furniture f = JsonSerializer.Deserialize<Furniture>(msg, options);
+
+                        lf.Add(f);
+                        msg = client.Receive(1024);
+                        msg = msg.TrimEnd(new char[] { '\0' });
+                    }
+
+                    Action act2 = () => showFurniture(lf);
+                    Invoke(act2);
+                }
+            }
+        }
+
+        private void showOthers(List<int> others)
+        {
+            foreach (int id in others) { lboth.Items.Add(id); }
+            oth.Controls.Add(lboth);
+
+            oth.Show();
+        }
+        private void showFurniture(List<Furniture> l)
+        {
+            foreach (Furniture f in l)
+            {
+                string eq = "";
+                foreach (Detail d in f.equipment) { eq += d.name + " "; }
+
+                listBox1.Items.Add($"ID: {f.id}, Name: {f.name}, Type: {eq}");
+            }
+            listBox1.AutoSize = true;
+            dlg3.Controls.Add(listBox1);
+
+            dlg3.Size = new Size(listBox1.Width, listBox1.Height);
+            dlg3.Show();
         }
     }
 }

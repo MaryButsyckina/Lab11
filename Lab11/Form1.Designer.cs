@@ -17,6 +17,7 @@
             {
                 components.Dispose();
             }
+            dispose_fl = true;
             base.Dispose(disposing);
         }
 
@@ -34,7 +35,14 @@
             this.changeItemToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tcpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.listView1 = new System.Windows.Forms.ListView();
+            lb1 = new ListView();
+            set = new Form();
+            oth = new Form();
+            lboth = new ListBox();
+            dlg3 = new Form();
+            listBox1 = new ListBox();
             this.menuStrip2.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -46,6 +54,7 @@
             this.removeItemToolStripMenuItem,
             this.changeItemToolStripMenuItem,
             this.showToolStripMenuItem,
+            this.tcpToolStripMenuItem,
             this.aboutToolStripMenuItem,});
             this.menuStrip2.Location = new System.Drawing.Point(0, 0);
             this.menuStrip2.Name = "menuStrip2";
@@ -96,6 +105,19 @@
             this.aboutToolStripMenuItem.DropDownItems[2].Click += editInfoItemToolStripMenuItem_Click;
             this.aboutToolStripMenuItem.DropDownItems[3].Click += showInfoItemToolStripMenuItem_Click;
             this.aboutToolStripMenuItem.DropDownItems[4].Click += aboutItemToolStripMenuItem_Click;
+            //
+            //tcpToolStripMenuItem
+            //
+            this.tcpToolStripMenuItem.Text = "TCP";
+            this.tcpToolStripMenuItem.Size = new Size(64, 24);
+            this.tcpToolStripMenuItem.DropDownItems.Add("Connect");
+            this.tcpToolStripMenuItem.DropDownItems.Add("Settings");
+            this.tcpToolStripMenuItem.DropDownItems.Add("Other clients");
+            this.tcpToolStripMenuItem.DropDownItems.Add("Disconnect");
+            this.tcpToolStripMenuItem.DropDownItems[0].Click += connect;
+            this.tcpToolStripMenuItem.DropDownItems[1].Click += settings;
+            this.tcpToolStripMenuItem.DropDownItems[2].Click += others;
+            this.tcpToolStripMenuItem.DropDownItems[3].Click += disconnect;
             // 
             // listView1
             // 
@@ -122,6 +144,12 @@
             removeMenuItem.Click += removeItemToolStripMenuItem_Click;
             editMenuItem.Click += editItemToolStripMenuItem_Click;
             showMenuItem.Click += showItemToolStripMenuItem_Click;
+
+            lboth.AutoSize = true;
+            ContextMenuStrip cms = new ContextMenuStrip();
+            lboth.ContextMenuStrip = cms;
+            cms.Items.Add("send random 2 objects");
+            cms.Items[0].Click += senfOthers;
             // 
             // Form1
             // 
@@ -137,7 +165,7 @@
             this.menuStrip2.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
-
+            
         }
 
         #endregion
@@ -147,7 +175,15 @@
         private ToolStripMenuItem changeItemToolStripMenuItem;
         private ToolStripMenuItem aboutToolStripMenuItem;
         private ToolStripMenuItem showToolStripMenuItem;
+        private ToolStripMenuItem tcpToolStripMenuItem;
         private ListView listView1;
+        private System.Windows.Forms.ListView lb1;
+        private Form set;
+        private Form oth;
+        private ListBox lboth;
+        private Form dlg3;
+        private ListBox listBox1;
+
         private System.Windows.Forms.ListView listView2 = new System.Windows.Forms.ListView();
     }
 }
